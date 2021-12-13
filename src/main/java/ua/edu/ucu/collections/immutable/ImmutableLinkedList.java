@@ -6,97 +6,81 @@ import java.util.InputMismatchException;
 public final class ImmutableLinkedList implements ImmutableList {
     private Node head;
     private Node tail;
-    private int length;
+    private int size;
 
     public ImmutableLinkedList(Object[] elements) {
-        this.head = null;
-        this.tail = null;
-        this.length = 0;
-        Node cur = null;
-        for (Object el : elements) {
-            Node newNode = new Node();
-            newNode.setValue(el);
-            if (cur != null) {
-                cur.setNext(newNode);
-            }
-            newNode.setPrevious(cur);
-            cur = newNode;
-            if (this.length == 0) {
-                this.head = newNode;
-            }
-            if (this.length == elements.length - 1) {
-                this.tail = newNode;
-            }
-            this.length++;
+        head = new Node(elements[0], null, null);
+        Node temp = head;
+        size = elements.length;
+        for (int i = 1; i < size; i++) {
+            temp.setNext(new Node(elements[i], temp, null));
+            temp = temp.getNext();
         }
+        tail = temp;
     }
 
     public ImmutableLinkedList() {
-        this.length = 0;
-        this.head = null;
-        this.tail = null;
+        size = 0;
+        head = null;
+        tail = null;
     }
 
     @Override
     public ImmutableList add(Object e) {
-        return this.addAll(this.length, new Object[] {e});
+        Object[] val = {e};
+        return addAll(this.size, val);
     }
 
     @Override
     public ImmutableList add(int index, Object e) {
-        return this.addAll(index, new Object [] {e});
+        Object[] val = {e};
+        return addAll(index, val);
     }
 
     @Override
     public ImmutableList addAll(Object[] c) {
-        return this.addAll(this.length, c);
+        return addAll(size, c);
     }
 
     @Override
     public ImmutableList addAll(int index, Object[] c) {
-        if (index < 0 || index > this.length) {
-            throw new IndexOutOfBoundsException();
-        }
-        Object[] ourList = Arrays.copyOf(this.toArray(), this.length);
-        Object[] finalArray = new Object[this.length + c.length];
-        for (int i = 0; i < finalArray.length; ++i) {
+        checkIndex(index);
+        Object[] thisList = Arrays.copyOf(toArray(), size);
+        Object[] newList = new Object[size + c.length];
+        for (int i = 0; i < newList.length; i++) {
             if (i < index) {
-                finalArray[i] = ourList[i];
+                newList[i] = thisList[i];
             } else if (i < index + c.length) {
-                finalArray[i] = c[i-index];
+                newList[i] = c[i-index];
             } else {
-                finalArray[i] = ourList[i - c.length];
+                newList[i] = thisList[i - c.length];
             }
         }
-        return new ImmutableLinkedList(finalArray);
+        return new ImmutableLinkedList(newList);
     }
 
     @Override
     public Object get(int index) {
-        if (index < 0 || index >= this.length) {
-            throw new IndexOutOfBoundsException();
-        }
-        Node curNode = this.head;
-        int cur = 0;
-        while (curNode != null) {
-            if (cur == index) {
-                return curNode.getValue();
+        checkIndex(index);
+        Node temp = head;
+        int counter = 0;
+        while (temp != null) {
+            if (counter == index) {
+                return temp.getValue();
             }
-            curNode = curNode.getNext();
-            ++cur;
+            temp = temp.getNext();
+            counter++;
         }
         return null;
     }
 
     @Override
     public ImmutableLinkedList remove(int index) {
-        if (index < 0 || index >= this.length) {
-            throw new IndexOutOfBoundsException();
-        }
-        Object[] ourList = Arrays.copyOf(this.toArray(), this.length);
-        Object[] newList = new Object[this.length-1];
+        checkIndex(index);
+        Object[] ourList = Arrays.copyOf(toArray(), size);
+        Object[] newList = new Object[size -1];
         int counter = 0;
-        for (int i = 0; i < this.length; ++i) {
+        for (int i = 0; i < size; i++) {
             if (i == index) {
                 continue;
             }
@@ -106,79 +90,87 @@ public final class ImmutableLinkedList implements ImmutableList {
     }
 
     @Override
-    public ImmutableList set(int index, Object e) {
-        ImmutableList linkedList = this.remove(index);
-        return linkedList.add(index, e);
+    public ImmutableLinkedList set(int index, Object e) {
+        Object[] thisArr = toArray();
+        Object[] newArr = new Object[size()];
+        for (int i = 0; i < size(); i++) {
+            if (i != index) {
+                newArr[i] = thisArr[i];
+            } else {
+                newArr[i] = e;
+            }
+        }
+        return new ImmutableLinkedList(newArr);
     }
 
     @Override
     public int indexOf(Object e) {
-        Node curNode = this.head;
+        Node temp = head;
         int counter = 0;
-        while (curNode != null) {
-            if (curNode.getValue() == e) {
+        while (temp != null) {
+            if (temp.getValue() == e) {
                 return counter;
             }
             ++counter;
-            curNode = curNode.getNext();
+            temp = temp.getNext();
         }
-        throw new InputMismatchException();
+        return -1;
     }
 
     @Override
     public int size() {
-        return this.length;
+        return size;
     }
 
     @Override
     public ImmutableList clear() {
-        Object[] res = new Object[this.length];
+        Object[] res = new Object[size];
         return new ImmutableLinkedList(res);
     }
 
     @Override
     public boolean isEmpty() {
-        return this.length == 0;
+        return size == 0;
     }
 
     @Override
     public Object[] toArray() {
-        Object[] res = new Object[this.length];
-        Node curNode = this.head;
+        Object[] res = new Object[size];
+        Node temp = this.head;
         int counter = 0;
-        while (curNode != null) {
-            res[counter++] = curNode.getValue();
-            curNode = curNode.getNext();
+        while (temp != null) {
+            res[counter++] = temp.getValue();
+            temp = temp.getNext();
         }
         return res;
     }
 
     public ImmutableLinkedList addFirst(Object e) {
-        Object[] ourList = Arrays.copyOf(this.toArray(), this.length);
-        Object[] afterAdd = new Object[this.length + 1];
+        Object[] ourList = Arrays.copyOf(toArray(), size);
+        Object[] afterAdd = new Object[size + 1];
         afterAdd[0] = e;
-        for (int i = 1; i <= this.length; ++i) {
+        for (int i = 1; i <= size; ++i) {
             afterAdd[i] = ourList[i-1];
         }
         return new ImmutableLinkedList(afterAdd);
     }
 
     public ImmutableLinkedList addLast(Object e) {
-        Object[] ourList = Arrays.copyOf(this.toArray(), this.length);
-        Object[] afterAdd = new Object[this.length + 1];
-        afterAdd[this.length] = e;
-        for (int i = 0; i < this.length; ++i) {
-            afterAdd[i] = ourList[i];
+        Object[] thisList = Arrays.copyOf(toArray(), size);
+        Object[] newList = new Object[size + 1];
+        newList[size] = e;
+        for (int i = 0; i < size; ++i) {
+            newList[i] = thisList[i];
         }
-        return new ImmutableLinkedList(afterAdd);
+        return new ImmutableLinkedList(newList);
     }
 
     public Node getHead() {
-        return this.head;
+        return head;
     }
 
     public Node getTail() {
-        return this.tail;
+        return tail;
     }
 
     public Object getFirst() {
@@ -200,6 +192,12 @@ public final class ImmutableLinkedList implements ImmutableList {
     }
 
     public ImmutableLinkedList removeLast() {
-        return remove(length-1);
+        return remove(size -1);
+    }
+
+    private void checkIndex(int index) {
+        if (index < 0 || index > size) {
+            throw new IndexOutOfBoundsException();
+        }
     }
 }
