@@ -102,7 +102,7 @@ public final class ImmutableArrayList implements ImmutableList {
         return items.clone();
     }
 
-    private void checkIndex(int index){
+    private void checkIndex(int index) {
         if (index > size()) {
             throw new IndexOutOfBoundsException("1");
         } else if (index < 0) {
