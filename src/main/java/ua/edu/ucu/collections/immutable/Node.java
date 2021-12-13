@@ -8,6 +8,12 @@ public class Node {
     public Node() {
     }
 
+    public Node(Object val, Node prev, Node ne){
+        value = val;
+        previous = prev;
+        next = ne;
+    }
+
     @Override
     public String toString() {
         return value.toString();
@@ -15,24 +21,27 @@ public class Node {
 
 
     public Node getPrevious() {
-        return null;
+        return previous;
     }
 
     public void setPrevious(Node prev) {
+        previous = prev;
     }
 
     public Object getValue() {
-        return null;
+        return value;
     }
 
     public void setValue(Object val) {
+        value = val;
     }
 
     public Node getNext() {
-        return null;
+        return next;
     }
 
     public void setNext(Node ne) {
+        next = ne;
     }
 }
 
