@@ -77,6 +77,9 @@ public final class ImmutableLinkedList implements ImmutableList {
     @Override
     public ImmutableLinkedList remove(int index) {
         checkIndex(index);
+        if (size == 1) {
+            return new ImmutableLinkedList();
+        }
         Object[] ourList = Arrays.copyOf(toArray(), size);
         Object[] newList = new Object[size -1];
         int counter = 0;
@@ -192,7 +195,7 @@ public final class ImmutableLinkedList implements ImmutableList {
     }
 
     public ImmutableLinkedList removeLast() {
-        return remove(size -1);
+        return remove(size - 1);
     }
 
     private void checkIndex(int index) {
